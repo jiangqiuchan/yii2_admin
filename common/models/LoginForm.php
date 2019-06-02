@@ -9,25 +9,29 @@ use yii\base\Model;
  */
 class LoginForm extends Model
 {
-    public $username;
+    public $mobile;
     public $password;
-    public $rememberMe = true;
+    public $rememberMe;
+    public $is_online;
 
     private $_user;
 
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function rules()
     {
         return [
             // username and password are both required
-            [['username', 'password'], 'required'],
+            [['mobile','password'], 'filter', 'filter' => 'trim'],
+            [['mobile'], 'required','message' => '请输入正确的手机号码格式'],
+            [['password'], 'required','message' => '请输入正确的密码格式'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
+            ['is_online', 'integer'],
         ];
     }
 
@@ -42,8 +46,8 @@ class LoginForm extends Model
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
-            if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
+            if (!$user || !$user->password_hash || !$user->validatePassword($this->password)) {
+                $this->addError($attribute, '手机号码或密码不正确');
             }
         }
     }
@@ -51,15 +55,23 @@ class LoginForm extends Model
     /**
      * Logs in a user using the provided username and password.
      *
-     * @return bool whether the user is logged in successfully
+     * @return boolean whether the user is logged in successfully
      */
     public function login()
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+            $user = $this->getUser();
+            $login = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            if ($login) {
+                $user->last_login_at = time();
+                $user->is_online = 1;
+                $user->save();
+                return $login;
+            }
+
+        } else {
+            return false;
         }
-        
-        return false;
     }
 
     /**
@@ -70,7 +82,7 @@ class LoginForm extends Model
     protected function getUser()
     {
         if ($this->_user === null) {
-            $this->_user = User::findByUsername($this->username);
+            $this->_user = User::findByUsername($this->mobile);
         }
 
         return $this->_user;

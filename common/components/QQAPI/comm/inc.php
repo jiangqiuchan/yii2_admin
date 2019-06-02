@@ -1,0 +1,2 @@
+<?php die('forbidden'); ?>
+{"appid":"101470612","appkey":"cec22f9d8def954a4b415fd1c9fd31a0","callback":"http://pdf.66zip.cn/api-pdf","scope":"get_user_info","errorReport":true,"storageType":"file","host":"localhost","user":"root","password":"root","database":"test"}

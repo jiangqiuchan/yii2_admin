@@ -1,38 +1,43 @@
 <?php
 namespace frontend\models;
 
-use yii\base\Model;
 use common\models\User;
+use yii\base\Model;
+use Yii;
 
 /**
  * Signup form
  */
 class SignupForm extends Model
 {
-    public $username;
-    public $email;
+    public $mobile;
+    public $last_login_at;
     public $password;
-
+    public $username;
+    public $channel;
+    public $referer;
+    public $type;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function rules()
     {
         return [
-            ['username', 'trim'],
-            ['username', 'required'],
-            ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This username has already been taken.'],
-            ['username', 'string', 'min' => 2, 'max' => 255],
+            [['mobile','password'], 'filter', 'filter' => 'trim'],
+            ['mobile', 'required'],
+            ['mobile', 'unique', 'targetClass' => '\common\models\User', 'message' => '手机号已存在'],
+            [['mobile','username'], 'string', 'min' => 2, 'max' => 255],
 
-            ['email', 'trim'],
-            ['email', 'required'],
-            ['email', 'email'],
-            ['email', 'string', 'max' => 255],
-            ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
+//             ['email', 'filter', 'filter' => 'trim'],
+//             ['email', 'required'],
+//             ['email', 'email'],
+//             ['email', 'string', 'max' => 255],
+//             ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
 
-            ['password', 'required'],
+            ['password','required','when' => function($model){ return ($model->type == 'password'); }],
             ['password', 'string', 'min' => 6],
+            [['last_login_at','channel','referer','type'],'safe']
         ];
     }
 
@@ -46,11 +51,14 @@ class SignupForm extends Model
         if (!$this->validate()) {
             return null;
         }
-        
+
         $user = new User();
+        $user->mobile = $this->mobile;
         $user->username = $this->username;
-        $user->email = $this->email;
-        $user->setPassword($this->password);
+        $user->last_login_at = time();
+        $user->channel = $this->channel;
+        $user->referer = $this->referer;
+        $this->password ? $user->setPassword($this->password) : '';
         $user->generateAuthKey();
         
         return $user->save() ? $user : null;

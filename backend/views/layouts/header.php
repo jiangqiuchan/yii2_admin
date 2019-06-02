@@ -33,8 +33,8 @@ use yii\helpers\Html;
                         <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="user-image" alt="User Image"/>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)"><i class="glyphicon glyphicon-user"></i> 修改密码</a></li>
-                        <li><a href="/admin/user/logout"><i class="glyphicon glyphicon-off"></i> 注销</a></li>
+                        <li><a href="/site/reset-password?id=<?=Yii::$app->user->identity->id ?>"><i class="glyphicon glyphicon-user"></i> 修改密码</a></li>
+                        <li><a href="/site/logout"><i class="glyphicon glyphicon-off"></i> 注销</a></li>
                     </ul>
                 </li>
 
