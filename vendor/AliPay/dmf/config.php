@@ -1,0 +1,31 @@
+<?php
+ $config = array (
+		//签名方式,默认为RSA2(RSA2048)
+		'sign_type' => "RSA2",
+
+		//支付宝公钥
+		'alipay_public_key' => "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmO3KW0YxJQmdPVivhpNuNvfaW6AnwMcCj7zTs1MlupH4LIxpU4s5aNc7HA1OD3brlBc8z8+iZfdhxVqX3FxWrXPOsN4gPcNo6KpAlfH6BzOsJzQO3jYTxETSGFdJncMw4v9pUOZKkwPDGFfxR7v0V5YXCVkJvNsLfrSkAGk9vHKwXchhlZSGv7dxf8r6/H/qkmK+WDAwM5pGjWQCeO6vBYCe3bGJCmdzFckGmEwCxrofb2cvfI5Dwb7vqRkY+guolucpWTGii1q1pG5OT1S86WT7qtKw10vuVJLPHtutoog0RRm/espnTfGC40GUsDln/mUPeOKXEMpf6q3UlMGJ6wIDAQAB",
+
+		//商户私钥
+		'merchant_private_key' => "MIIEogIBAAKCAQEAmzjP2EbS4KGTyug2snIvmU/kJ757DW7eBJu2dZHmre/tlDBqs9oEdhhT9AdgFsqOxVq7gvjqL7YKouNtR5KX36CpPA7/Osz9cirJ+wNz6o/QfR1TM0OJlF53JJkWPWBmx5Qt2m8ux8htOQRhzIYwHo4cBLXo74tyhPfl1NOsDmSfsmMs5LT9ywM7LovMLB9boOpHHQ/4fHMkSOT16pFGlZvqNF92zoDcwCs4KZuNA092L1K8NgPfkqcNt9dwKjLwP5MyVvPKQc2yQY9t4i5xMGWeWt8iq0MhQ/ceBsZh5eB3m8USUXXm8Za3EVWFyk7o02FYSRZAMOGKGeDLtqYwLwIDAQABAoIBAHEbuPkUwt3FX/jftdvasSy6trrvZqOnQkmBXjfWFY5x42G01kwwdkfH+oU8SpzRBbByKWmLELurn5yKtTsOa3UdkbSeCQZEEft7iqtLHNCz82z4TYRxlnNzUsZsd3RKJxsPs0oU8rXKKyz9MHbk4XOignA8Tn0f1FdofSXVCO+C6QcsWRfhi0iiCZRaWPBhoLRle1FYhsBNamOFAzTooJhu7eVl4KLDpu3OXWBgW044MXRPCXW/+jRWWtzLnsIyg8PQrYN+kYEjah6SHSgIa7fV67aSf/yZeEMTT2Q/ORexhyEQJgMeqUFjpzdS5UvPikajzTsa2bx2sinLdKPZe+ECgYEAx1jBdjeWeRXekNsmSVLxd+nQSXonMGG1EawJ2hXUa8YXzd2MaypRww3hzsq1BERgzDe37l7NeNZSwPyNxi5pd2oJAi32EFgBMakXFjOQwcLfrtfEnaxhvgSkGBqYMDkCp4I7Y2XWG87+1Cg/jL4duOTJ864CwqoqeWhIjiQLw1MCgYEAx1XOvbVGTGNrXssGEHtVd1s1nCpydlyiRN5YD1zawjtlHTHx3l+GKyoDiRG4ZFgpcGnNzk7lWXuMjBkmIu4UGizZwOUasIBtIXz60hA8BEuSOXbOJk+lWDOefKaxem9VmJfWR75rjtbKL9Rh9g15ZNGMHXHMmPRj61EuaNjWQDUCgYBioB7XBhmEPrWmpUYD8O1Wjm9mavEIls6mt58ILtSxnYgZagsW2hEpl6yoStHUEqBxaP+vB2hQ6Hh40nqyGjRDyEo8sdCTtXahwy6Q5WIw+uD/9/BmseqJwHIPGtlAwnP1vBD11GRhzb9155PJZiX+W/MuhGEJPndVKar76AmJ0QKBgCqpOKftRfBPTslo1hFs8+upf52+j+S5CpmGpH4VN1ReddN7vvICq6pNQZhyTG5dV/ERE9TVmcw+3uOU9k5/eZnog2n/Hmkr8y85mkye4NliexcFUDVu0kpAMeknm9BCR6VyyY9tN4PIgFkgMR8B3zsuhbg/hLQvibrxEuepkKEJAoGAQ7t/T82wIur0FKni4iUye5XYNvls+PSZUyygRgHoe2RwX2KhwXXaTqq98oCU6jvuimyqGHIrVpdK0xuA84Co9jesuapUSCQsKbeXDuxm+l047ioQKVJeSVzBLePsoDzslwGKe6L7xdlU/Bypw1pV+gxrUHHLRufi59lsCNpWKhw=",
+
+		//编码格式
+		'charset' => "UTF-8",
+
+		//支付宝网关
+		'gatewayUrl' => "https://openapi.alipay.com/gateway.do",
+
+		//应用ID
+		'app_id' => "2017121900967489",
+
+		//异步通知地址,只有扫码支付预下单可用
+		'notify_url' => "http://pdf.66zip.cn/notify/zfb-dmf-notify1",
+
+		//最大查询重试次数
+		'MaxQueryRetry' => "10",
+
+		//查询间隔
+		'QueryDuration' => "3"
+);
+
+
