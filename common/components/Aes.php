@@ -10,7 +10,7 @@ namespace common\components;
 class Aes{
     //密钥
     private $_secrect_key;
-    const pdf  = 'FXnj9SZ2UUnicdHS';
+    const pdf  = 'FXnj9SZ2UUzkFIpm';
       
     public function __construct($key){
         $this->_secrect_key = $key;

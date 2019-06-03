@@ -31,77 +31,10 @@ class BaseController extends Controller
         return $str;
     }
     
-    //校验token
-    public function checkToken($str) {
-        $key = 'PXS69OwvOeeAS6fU32rUUA';
-        $time = time();
-        $data = $this->jiemi($str);
-        $return = ['status' => '1','msg' => '校验成功'];
-
-        if ($data) {
-            $dataArr = explode('&', $data);
-            $acceptTime = $dataArr[1];
-
-            if ($time - $acceptTime > 300) {
-                $return = ['status' => '0','msg' => '校验超时'.'-服务器时间：'.$time.'-发送时间：'.$acceptTime];
-                return $return;
-            }
-            
-            $myStr = $this->jiami($key.'&'.$acceptTime);
-            if ($str == $myStr) {
-                return $return;
-            } else {
-                $return = ['status' => '0','msg' => '字符串校验失败'.'-接收：'.$str.'-本地：'.$myStr];
-                return $return;
-            }
-        } else {
-            $return = ['status' => '0','msg' => '解密失败'.'：'.$str];
-            return $return;
-        }
-    }
-    
-    //使用openid登录
-    public function OpenidLogin($type,$openid)
-    {
-        $oauth = OauthThirdLogin::find()->where("type = '$type' AND openid = :openid", [':openid' => $openid])->orderBy('id DESC')->one();
-    
-        if ($oauth) {
-            $user = User::findOne($oauth->user_id);
-            if ($user) {
-                Yii::$app->user->login($user);
-            } else {
-                $this->actionLogout();
-            }
-        }
-        return $oauth;
-    }
-    
     //软件跳转页面时登录
     public function softToWebLogin()
     {
-        if (isset($_GET['openid']) && isset($_GET['type'])) {
-            $type = $this->jiemi(Yii::$app->request->get('type'));
-            $openid = $this->jiemi(Yii::$app->request->get('openid'));
-            $this->OpenidLogin($type, $openid);
-        
-            $oauth = OauthThirdLogin::find()->where("openid = '$openid'")->one();
-
-        } elseif (isset($_GET['mobile']) && isset($_GET['password'])) {
-            $post['mobile'] = $this->jiemi(Yii::$app->request->get('mobile'));
-            $post['password'] = $this->jiemi(Yii::$app->request->get('password'));
-
-            if ($post['password']) {
-                $model = new LoginForm();
-                $post['LoginForm'] = $post;
-        
-                $model->load($post) && $model->login();
-            } else {
-                $model = User::findByUsername($post['mobile']);
-                if ($model) {
-                    Yii::$app->user->login($model);
-                }
-            }
-        } elseif (isset($_GET['utoken'])) {
+        if (isset($_GET['utoken'])) {
             //token登录
             $time = time();
             $utoken = $this->jiemi($_GET['utoken']);

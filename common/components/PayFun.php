@@ -14,63 +14,6 @@ require_once "../../vendor/WxPay/WxPay.JsApiPay.php";
  * 第三方支付模块
  */
 class PayFun{
-    //支付宝--即时到账
-    public function zfbJsdz($outTradeNo,$money,$show_url = 'http://pdf.66zip.cn/',$target='_self'){
-        //建立请求
-        $alipay = new \AlipayPay();
-        $data = [];
-        $data['status'] = '1';
-        $data['msg'] = $alipay->requestPay($outTradeNo, '光速PDF支付', $money, '光速PDF服务支付', $show_url,$target);
-        return json_encode($data);
-    }
-    
-    //支付宝--当面付--扫码付
-    public function zfbDmf1($outTradeNo,$money){
-        // 创建请求builder，设置请求参数
-        $qrPayRequestBuilder = new \AlipayTradePrecreateContentBuilder();
-        $qrPayRequestBuilder->setOutTradeNo($outTradeNo);
-        $qrPayRequestBuilder->setTotalAmount($money);
-        $qrPayRequestBuilder->setTimeExpress('5m');
-        $qrPayRequestBuilder->setSubject('光速PDF服务支付');
-        $qrPayRequestBuilder->setBody('光速PDF支付');   
-        
-        // 调用qrPay方法获取当面付应答
-        $qrPay = new \AlipayTradeService();
-        $qrPayResult = $qrPay->qrPay($qrPayRequestBuilder);
-        
-        //	根据状态值进行业务处理
-        $data['status'] = '0';
-        switch ($qrPayResult->getTradeStatus()){
-            case "SUCCESS":
-                $response = $qrPayResult->getResponse();
-//                 $qrcode = $qrPay->create_erweima($response->qr_code);
-                $url = $response->qr_code;
-
-                $data['status'] = '1';
-                $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url) .'" class="ewm" style="margin-top:23px"/>';
-                $data['info'] = '订单提交成功，请您尽快完成付款！ 订单号：'.$outTradeNo;
-                $data['orderid'] = $outTradeNo;
-                	
-                break;
-            case "FAILED":
-                echo "支付宝创建订单二维码失败!!!"."<br>--------------------------<br>";
-                if(!empty($qrPayResult->getResponse())){
-                    print_r($qrPayResult->getResponse());
-                }
-                break;
-            case "UNKNOWN":
-                echo "系统异常，状态未知!!!"."<br>--------------------------<br>";
-                if(!empty($qrPayResult->getResponse())){
-                    print_r($qrPayResult->getResponse());
-                }
-                break;
-            default:
-                echo "不支持的返回状态，创建订单二维码返回异常!!!";
-                break;
-        }
-        return json_encode($data);
-    }
-
     //支付宝--当面付--扫码付--获取二维码链接
     public function zfbDmf1Url($outTradeNo,$money){
         // 创建请求builder，设置请求参数
@@ -112,40 +55,6 @@ class PayFun{
                 echo "不支持的返回状态，创建订单二维码返回异常!!!";
                 break;
         }
-    }
-    
-    //微信--扫码支付
-    public function wxSmzf($outTradeNo,$money,$package,$order,$type = 2){
-        $notify = new \NativePay();
-        
-        $input = new \WxPayUnifiedOrder();
-        $input->SetBody("光速PDF支付");
-        $input->SetAttach("光速PDF服务支付");
-        $input->SetOut_trade_no($outTradeNo);
-        $input->SetTotal_fee($money*100);
-        $input->SetTime_start(date("YmdHis"));
-        $input->SetTime_expire(date("YmdHis", time() + 600));
-        $input->SetGoods_tag($package);
-//         $input->SetNotify_url("http://pdf.66zip.cn/notify/wx-smzf-notify");
-        $input->SetNotify_url("http://pdf.66zip.cn/pay/notify");
-        $input->SetTrade_type("NATIVE");
-        $input->SetProduct_id($order->id);
-        $result = $notify->GetPayUrl($input);
-        $url = $result["code_url"];
-
-        $data = [];
-        $data['status'] = '1';
-
-        //生成二维码图片
-        if ($type == '1') {
-            $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url).'&size=5&margin=1" class="ewm"/>';
-        } else {
-            $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url) .'" class="ewm" style="margin-top:23px"/>';
-        }
-        $data['info'] = '订单提交成功，请您尽快完成付款！ 订单号：'.$outTradeNo;
-        $data['orderid'] = $outTradeNo;
-        
-        return 	json_encode($data);
     }
 
     //微信--公众号支付

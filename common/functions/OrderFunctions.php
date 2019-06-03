@@ -21,7 +21,6 @@ class OrderFunctions {
     /**
      * 单独获取最新有效订单model 
      * @param int    user_id 用户id
-     * @param string referer 来源 pdf,ocr 
      * @param string where   查询条件 
      */
     public static function getOrderModel($userId,$where='1')
@@ -44,7 +43,7 @@ class OrderFunctions {
     public static function getExpireTime($userId,$where='1')
     {
         $order = SoftPdfOrder::find()
-            ->where("user_id = $userId AND pay_status = 1 AND referer LIKE '%pdf%'")
+            ->where("user_id = $userId AND pay_status = 1")
             ->andWhere($where)
             ->orderBy('created_at DESC')
             ->one();
@@ -58,13 +57,12 @@ class OrderFunctions {
     /**
      * 单独获取用户所有有效订单model 
      * @param int    user_id 用户id
-     * @param string referer 来源 pdf,ocr 
      * @param string where   查询条件 
      */
-    public static function getOrderModels($userId,$referer,$where='1')
+    public static function getOrderModels($userId,$where='1')
     {
         $order = SoftPdfOrder::find()
-            ->where("user_id = $userId AND pay_status = 1 AND referer LIKE '%pdf%'")
+            ->where("user_id = $userId AND pay_status = 1")
             ->andWhere($where)
             ->orderBy('id DESC')
             ->all();
@@ -94,7 +92,6 @@ class OrderFunctions {
     /**
      * 获取用户信息与其订单信息数组--接口
      * @param int    user_id 用户id
-     * @param string referer 来源 pdf,ocr
      */
     public static function getApiUserOrderData($userId)
     {
@@ -134,7 +131,7 @@ class OrderFunctions {
             ->alias('u')
             ->select("u.username,u.mobile,u.id,t.headimgurl,o.expire_time")
             ->leftJoin("(SELECT headimgurl,user_id FROM oauth_third_login WHERE user_id = $userId) AS t",'t.user_id = u.id')
-            ->leftJoin("(SELECT user_id,expire_time FROM soft_pdf_order WHERE pay_status=1 AND user_id = $userId AND package <> 11 AND referer LIKE '%pdf%' ORDER BY created_at DESC) AS o",'o.user_id = u.id')
+            ->leftJoin("(SELECT user_id,expire_time FROM soft_pdf_order WHERE pay_status=1 AND user_id = $userId AND package <> 11 ORDER BY created_at DESC) AS o",'o.user_id = u.id')
             ->where("u.id = $userId")
             ->asArray()
             ->one();
@@ -164,14 +161,13 @@ class OrderFunctions {
     /**
      * 是否为会员及返回套餐类型--在线转换
      * @param int    user_id 用户id
-     * @param string referer 来源 pdf,ocr
      * @param string where   查询条件 
      */
-    public static function getVipPackage($userId,$referer='pdf',$where='1')
+    public static function getVipPackage($userId,$where='1')
     {
         $time = time();
         $order = SoftPdfOrder::find()
-            ->where("user_id = $userId AND pay_status = 1 AND expire_time >= '$time' AND referer LIKE '%$referer%'")
+            ->where("user_id = $userId AND pay_status = 1 AND expire_time >= '$time'")
             ->andWhere($where)
             ->orderBy('created_at DESC')
             ->one();
@@ -232,13 +228,12 @@ class OrderFunctions {
     /**
      * 下单时获取套餐开始计算时间
      * @param int    package  套餐类型编号
-     * @param int    referer  pdf,ocr
      */
-    public static function getExpireStartTime($userId,$referer = 'pdf',$where="1")
+    public static function getExpireStartTime($userId,$where="1")
     {
         $time = time();
         $user = SoftPdfOrder::find()
-            ->where("user_id = $userId AND pay_status = 1 AND referer LIKE '%$referer%' AND (expire_time >= $time OR expire_time = 100)")
+            ->where("user_id = $userId AND pay_status = 1 AND (expire_time >= $time OR expire_time = 100)")
             ->andWhere($where)
             ->orderBy("created_at DESC")
             ->one();
@@ -315,10 +310,9 @@ class OrderFunctions {
      * @param int     pay_type_method 支付来源 
      * @param int     drawId          奖品ID
      * @param int     prizeId         奖项/优惠ID
-     * @param string  referer         来源，pdf,ocr
      * @param int     $manConvertPass 是否能获取免费人工转换次数
      */
-    public static function createOrder($money,$outTradeNo,$userId,$payType,$package,$startTime,$expireTime,$pay_type_method,$drawId='0',$prizeId='0',$referer='pdf',$manConvertPass='0')
+    public static function createOrder($money,$outTradeNo,$userId,$payType,$package,$startTime,$expireTime,$pay_type_method,$drawId='0',$prizeId='0',$manConvertPass='0')
     {
         $return = [];
         //创建支付订单
@@ -343,7 +337,6 @@ class OrderFunctions {
         $order->pay_type_method = $pay_type_method;
         $order->draw_id = $drawId;
         $order->prize_id = $prizeId;
-        $order->referer = $referer;
 //        $order->man_convert_pass = $manConvertPass;
         //活动
         //             if (isset($_POST['draw_id']) && !empty($_POST['draw_id'])) {
