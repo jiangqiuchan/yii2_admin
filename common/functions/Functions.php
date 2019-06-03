@@ -33,22 +33,19 @@ class Functions {
      */
     public static function captcha($m,$c)
     {
-        $template = '【PDF】';
-        
-        $url = "https://sms.yunpian.com/v2/sms/single_send.json";
-        $apikey = "842b480cd350eda35800598b6387fba4"; //修改为您的apikey(https://www.yunpian.com)登陆官网后获取
+        $url = "https://api.sms.jpush.cn/v1/codes";
+        $base64_auth_string = 'Basic '.base64_encode('d56fbefe1b000a50753b747f:0931c43ce8e8dfd22efbcc20');
         $mobile = $m; //请用自己的手机号代替
-        $text = $template."您的验证码是：{$c}。请不要把验证码泄露给其他人。";
-        $data = array('text' => $text, 'apikey' => $apikey, 'mobile' => $mobile);
+        $data = array('temp_id' => 1, 'mobile' => $mobile);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept:text/plain;charset=utf-8', 'Content-Type:application/x-www-form-urlencoded','charset=utf-8'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:'. $base64_auth_string));
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $output = curl_exec($ch);
+        $output = curl_exec($ch);var_dump($output);die;
         curl_close($ch);
         $output = json_decode($output);
         return $output;
