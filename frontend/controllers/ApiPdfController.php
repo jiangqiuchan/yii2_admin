@@ -178,13 +178,10 @@ class ApiPdfController extends ApiBaseController
             $signupForm['SignupForm'] = $post;
             $model->load($signupForm);
 
-            $isCaptcha = Functions::checkCaptcha($post['mobile'],$post['captcha'],0);
+            $checkCaptcha = Functions::checkCaptcha($post['captcha']);
             
-            if ($isCaptcha) {
+            if ($checkCaptcha) {
                 if ($user = $model->signup()) {
-                    //修改验证码状态
-                    Functions::updateCaptcha($post['mobile'], $post['captcha']);
-                
                     if (Yii::$app->getUser()->login($user)) {
                             $data = 'status=1';
                     }
@@ -209,10 +206,7 @@ class ApiPdfController extends ApiBaseController
         $mobile = $this->jiemi(Yii::$app->request->post('mobile'));
         $type  = $this->jiemi(Yii::$app->request->post('type'));
         
-        $isEnviron  =  Yii::$app->params['isOnline'];
-        $captcha = $isEnviron ? rand(1000, 9999) : '1111';
-        $time = time();
-        $expire_time = $time + 300;
+//        $isEnviron  =  Yii::$app->params['isOnline'];
         
         if (empty($mobile) || !Functions::isMoblie($mobile)) {
             $data = 'status=-2';
@@ -233,13 +227,10 @@ class ApiPdfController extends ApiBaseController
         }
         
         //开始发送短信验证码
-        $output = Functions::captcha($mobile, $captcha);
-        if ($output->code == 0 || !$isEnviron){
-            //入库
-            $sql    = "INSERT INTO {{%soft_pdf_mobile_captcha}} (`mobile`, `captcha`, `expire_time`,`type`,`created_at`)
-            VALUES ('$mobile', '$captcha','$expire_time','$type','$time')";
-        
-            $return = Yii::$app->db->createCommand($sql)->execute();
+        $output = Functions::captcha($mobile);
+//        $output = json_decode('{"msg_id": "288193860302"}',true);
+        if (isset($output['msg_id'])){
+            Yii::$app->session->set('msg_id',$output['msg_id']);
             $data = 'status=1';
         }else{
             $data = 'status=-7';
@@ -265,8 +256,8 @@ class ApiPdfController extends ApiBaseController
                 return $this->jiami($data);
             }
         }
-        
-        $checkCap = Functions::checkCaptcha($mobile,$captcha,$type);
+
+        $checkCap = Functions::checkCaptcha($captcha);
         if (!$checkCap) {
             $data = 'status=-4';
             return $this->jiami($data);

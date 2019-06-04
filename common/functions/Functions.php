@@ -28,15 +28,14 @@ class Functions {
     /**
      * 发送短信接口
      * @param string $m --号码
-     * @return $c --内容
      * @auth lzj
      */
-    public static function captcha($m,$c)
+    public static function captcha($m)
     {
         $url = "https://api.sms.jpush.cn/v1/codes";
         $base64_auth_string = 'Basic '.base64_encode('d56fbefe1b000a50753b747f:0931c43ce8e8dfd22efbcc20');
         $mobile = $m; //请用自己的手机号代替
-        $data = array('temp_id' => 1, 'mobile' => $mobile);
+        $data = array('temp_id' => 1, 'mobile' => $mobile, 'sign_id' => 9041);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:'. $base64_auth_string));
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -45,43 +44,38 @@ class Functions {
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $output = curl_exec($ch);var_dump($output);die;
+        $output = curl_exec($ch);
         curl_close($ch);
-        $output = json_decode($output);
+        $output = json_decode($output,true);
         return $output;
     }
     /**
      * [checkCaptcha 验证验证码函数]
-     * @param  [type]  $mobile  [手机号]
      * @param  [type]  $captcha [验证码]
-     * @param  integer $type    [类型0注册，1重置密码， 2登录注册]
      * @return [type]           [是否通过]
      */
-    public static function checkCaptcha($mobile,$captcha,$type = 0){
-        $isMoblie = self::isMoblie($mobile);
-        $captcha  = intval($captcha);
-        $time     = time();
-    
-        if(!$isMoblie) return false;
-        //验证验证码
-        $sql    = " SELECT * FROM {{%soft_pdf_mobile_captcha}}
-        WHERE mobile = '$mobile' AND expire_time >= '$time' AND type = '$type' AND captcha = '$captcha'
-        ORDER BY id DESC";
-        $return = Yii::$app->db->createCommand($sql)->queryOne();
-    
-        return $return ? true : false;
-    }
-    /**
-     * [checkCaptcha 修改验证码为已使用]
-     * @param  [type]  $mobile  [手机号]
-     * @param  [type]  $captcha [验证码]
-     * @param  integer $type    [类型0注册，1重置密码， 2登录注册，4为绑定]
-     * @return [type]           [是否通过]
-     */
-    public static function updateCaptcha($mobile,$captcha,$type = 0){
-        $time = time();
-        $captchaSql   = "UPDATE  {{%soft_pdf_mobile_captcha}} SET is_use = '1',using_time = '$time' WHERE mobile ='{$mobile}' AND captcha = '{$captcha}' AND type = '{$type}' AND expire_time >= '$time'";
-        Yii::$app->db->createCommand($captchaSql)->execute();
+    public static function checkCaptcha($captcha){
+        $msg_id = Yii::$app->session->get('msg_id');
+        $url = "https://api.sms.jpush.cn/v1/codes/".$msg_id."/valid";
+        $base64_auth_string = 'Basic '.base64_encode('d56fbefe1b000a50753b747f:0931c43ce8e8dfd22efbcc20');
+        $data = array('code' => $captcha);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:'. $base64_auth_string));
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        $output = json_decode($output,true);
+
+        if (isset($output['is_valid']) && $output['is_valid'] == true){
+            return 1;
+        } else {
+            return 0;
+        }
     }
     /**
      * [userTextEncode 把用户输入的文本转义（主要针对特殊符号和emoji表情）]
