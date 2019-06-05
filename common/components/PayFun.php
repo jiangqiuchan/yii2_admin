@@ -15,7 +15,7 @@ require_once "../../vendor/WxPay/WxPay.JsApiPay.php";
  */
 class PayFun{
     //支付宝--当面付--扫码付--获取二维码链接
-    public function zfbDmf1Url($outTradeNo,$money){
+    public function zfbDmf1($outTradeNo,$money){
         // 创建请求builder，设置请求参数
         $qrPayRequestBuilder = new \AlipayTradePrecreateContentBuilder();
         $qrPayRequestBuilder->setOutTradeNo($outTradeNo);
@@ -36,7 +36,10 @@ class PayFun{
 //                 $qrcode = $qrPay->create_erweima($response->qr_code);
                 $url = $response->qr_code;
 
-                return $url;
+                $data['status'] = '1';
+                $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url) .'" class="ewm" style="margin-top:23px"/>';
+                $data['info'] = '订单提交成功，请您尽快完成付款！ 订单号：'.$outTradeNo;
+                $data['orderid'] = $outTradeNo;
 
                 break;
             case "FAILED":
@@ -55,44 +58,41 @@ class PayFun{
                 echo "不支持的返回状态，创建订单二维码返回异常!!!";
                 break;
         }
+        return json_encode($data);
     }
 
-    //微信--公众号支付
-    public function wxJszf($outTradeNo,$money,$package){
-        $arr = [];
-        try{
-            //①、获取用户openid
-            $tools = new \JsApiPay();
-            $openId = $tools->GetOpenid();
-            if ($openId) {
-                //②、统一下单
-                $input = new \WxPayUnifiedOrder();
-                $input->SetBody("光速PDF支付");
-                $input->SetAttach("光速PDF服务支付");
-                $input->SetOut_trade_no($outTradeNo);
-                $input->SetTotal_fee($money*100);
-                $input->SetTime_start(date("YmdHis"));
-                $input->SetTime_expire(date("YmdHis", time() + 600));
-                $input->SetGoods_tag($package);
-                $input->SetNotify_url("http://pdf.66zip.cn/pay/notify");
-                $input->SetTrade_type("JSAPI");
-                $input->SetOpenid($openId);
-                $order = \WxPayApi::unifiedOrder($input);
+    //微信--扫码支付
+    public function wxSmzf($outTradeNo,$money,$package,$order,$type = 2){
+        $notify = new \NativePay();
 
-                $jsApiParameters = $tools->GetJsApiParameters($order);
+        $input = new \WxPayUnifiedOrder();
+        $input->SetBody("光速PDF支付");
+        $input->SetAttach("光速PDF服务支付");
+        $input->SetOut_trade_no($outTradeNo);
+        $input->SetTotal_fee($money*100);
+        $input->SetTime_start(date("YmdHis"));
+        $input->SetTime_expire(date("YmdHis", time() + 600));
+        $input->SetGoods_tag($package);
+//         $input->SetNotify_url("http://pdf.66zip.cn/notify/wx-smzf-notify");
+        $input->SetNotify_url("http://pdf.66zip.cn/pay/notify");
+        $input->SetTrade_type("NATIVE");
+        $input->SetProduct_id($order->id);
+        $result = $notify->GetPayUrl($input);
+        $url = $result["code_url"];
 
-                //获取共享收货地址js函数参数
-                $editAddress = $tools->GetEditAddressParameters();
+        $data = [];
+        $data['status'] = '1';
 
-                $arr['jsApiParameters'] = $jsApiParameters;
-                $arr['editAddress'] = $editAddress;
-                return $arr;
-            } else {
-                echo '请重新扫码支付';die;
-            }
-        } catch(Exception $e) {
-            \Log::ERROR(json_encode($e));
+        //生成二维码图片
+        if ($type == '1') {
+            $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url).'&size=5&margin=1" class="ewm"/>';
+        } else {
+            $data['img'] = '<img alt="扫码支付" src="http://pdf.66zip.cn/pay/to-qrcode?data='.urlencode($url) .'" class="ewm" style="margin-top:23px"/>';
         }
+        $data['info'] = '订单提交成功，请您尽快完成付款！ 订单号：'.$outTradeNo;
+        $data['orderid'] = $outTradeNo;
+
+        return 	json_encode($data);
     }
     
     //微信--扫码支付--查询订单

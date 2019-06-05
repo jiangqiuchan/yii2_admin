@@ -189,30 +189,11 @@ class OrderFunctions {
         if ($type == 'pdf') {
             //12,13,14,15为临时价格
             $moneyArr = ['1' => '15','2' => '19','3' => '39','6' => '99','7' => '29','12' => '38','13' => '48','14' => '78','15' => '28'];
-        } elseif ($type == 'ocr') {
-            $moneyArr = ['7' => '38','3' => '58','6' => '88','66' => '118'];
-        } elseif ($type == 'test') {
-            $moneyArr = ['1' => '15','2' => '19','3' => '48','6' => '78','7' => '38'];
         }
         $return = [];
         if (isset($moneyArr[$package])) {
             $money = $moneyArr[$package];
-    
-            if ($drawId) {
-                if ($package == '6') {
-                    $data = ['status'=>'-1','msg'=>'购买永久会员不能使用优惠券'];
-    
-                    return 	json_encode($data);
-                }
-    
-                $useCoupon = Act1::useCoupon($_POST['draw_id'],Yii::$app->user->id, $money, $package);
-                if ($useCoupon['status'] != '1') {
-                    $data = $useCoupon;
-                    return 	json_encode($data);
-                } else {
-                    $money = $useCoupon['msg'];
-                }
-            }
+
             if(Yii::$app->user->id == '1'){
                 $money = '0.02';
             }
